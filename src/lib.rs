@@ -53,7 +53,7 @@ pub fn init_dam_break(particles: &mut Vec<Particle>, dam_max_particles: usize) {
     'outer: while y < (VIEW_HEIGHT - EPS * 2.0) {
         y += H;
         let mut x = VIEW_WIDTH / 10.0;
-        while x <= VIEW_WIDTH / 3.0 {
+        while x <= VIEW_WIDTH / 2.5 {
             x += H;
             if particles.len() < dam_max_particles {
                 let jitter = random::<f32>();
@@ -68,11 +68,11 @@ pub fn init_dam_break(particles: &mut Vec<Particle>, dam_max_particles: usize) {
 
 pub fn init_block(particles: &mut Vec<Particle>, max_block_particles: usize) {
     let mut placed = 0;
-    let mut y = VIEW_HEIGHT / 1.5 - VIEW_HEIGHT / 5.0;
-    'outer: while y < VIEW_HEIGHT / 1.5 + VIEW_HEIGHT / 5.0 {
+    let mut y = VIEW_HEIGHT / 1.5 - VIEW_HEIGHT / 10.0;
+    'outer: while y < VIEW_HEIGHT / 1.5 + VIEW_HEIGHT / 10.0 {
         y += H * 0.95;
-        let mut x = VIEW_WIDTH / 2.0 - VIEW_HEIGHT / 5.0;
-        while x < VIEW_WIDTH / 2.0 + VIEW_HEIGHT / 5.0 {
+        let mut x = VIEW_WIDTH / 2.0 - VIEW_HEIGHT / 10.0;
+        while x < VIEW_WIDTH / 2.0 + VIEW_HEIGHT / 10.0 {
             x += H * 0.95;
             if placed < max_block_particles {
                 particles.push(Particle::new(x, y));

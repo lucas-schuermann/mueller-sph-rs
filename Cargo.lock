@@ -645,19 +645,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "graphics"
-version = "0.1.0"
-dependencies = [
- "cgmath",
- "criterion",
- "glam",
- "glium",
- "lazy_static",
- "rand",
- "rayon",
-]
-
-[[package]]
 name = "half"
 version = "1.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -863,6 +850,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b9f1c5b025cda876f66ef43a113f91ebc9f4ccef34843000e0adf6ebbab84e21"
 dependencies = [
  "winapi",
+]
+
+[[package]]
+name = "mueller_sph_rs"
+version = "0.1.0"
+dependencies = [
+ "cgmath",
+ "criterion",
+ "glam",
+ "glium",
+ "lazy_static",
+ "rand",
+ "rayon",
 ]
 
 [[package]]

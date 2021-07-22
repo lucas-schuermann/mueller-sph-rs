@@ -1,7 +1,7 @@
 extern crate glium;
 use glium::{glutin, implement_vertex, uniform, Surface};
 use glutin::event::{ElementState, Event, KeyboardInput, StartCause, VirtualKeyCode, WindowEvent};
-use graphics;
+use mueller_sph_rs;
 
 #[derive(Copy, Clone)]
 struct Vertex {
@@ -14,12 +14,12 @@ const BLOCK_PARTICLES: usize = 250;
 const POINT_SIZE: f32 = 15.0;
 
 fn main() {
-    let mut particles: Vec<graphics::Particle> = Vec::new();
-    graphics::init_dam_break(&mut particles, DAM_PARTICLES);
+    let mut particles: Vec<mueller_sph_rs::Particle> = Vec::new();
+    mueller_sph_rs::init_dam_break(&mut particles, DAM_PARTICLES);
 
     let event_loop = glutin::event_loop::EventLoop::new();
     let size: glutin::dpi::LogicalSize<u32> =
-        (graphics::WINDOW_WIDTH, graphics::WINDOW_HEIGHT).into();
+        (mueller_sph_rs::WINDOW_WIDTH, mueller_sph_rs::WINDOW_HEIGHT).into();
     let wb = glutin::window::WindowBuilder::new()
         .with_inner_size(size)
         .with_resizable(false)
@@ -47,9 +47,9 @@ fn main() {
             .unwrap();
     let ortho_matrix: cgmath::Matrix4<f32> = cgmath::ortho(
         0.0,
-        graphics::VIEW_WIDTH,
+        mueller_sph_rs::VIEW_WIDTH,
         0.0,
-        graphics::VIEW_HEIGHT,
+        mueller_sph_rs::VIEW_HEIGHT,
         0.0,
         1.0,
     );
@@ -77,10 +77,10 @@ fn main() {
                     (VirtualKeyCode::R, ElementState::Pressed) => {
                         particles.clear();
                         println!("Cleared simulation");
-                        graphics::init_dam_break(&mut particles, DAM_PARTICLES);
+                        mueller_sph_rs::init_dam_break(&mut particles, DAM_PARTICLES);
                     }
                     (VirtualKeyCode::Space, ElementState::Pressed) => {
-                        graphics::init_block(&mut particles, BLOCK_PARTICLES);
+                        mueller_sph_rs::init_block(&mut particles, BLOCK_PARTICLES);
                     }
                     (VirtualKeyCode::Escape, ElementState::Pressed) => {
                         *control_flow = glutin::event_loop::ControlFlow::Exit;
@@ -98,7 +98,7 @@ fn main() {
             _ => return,
         }
 
-        graphics::update(&mut particles);
+        mueller_sph_rs::update(&mut particles);
 
         // draw
         let data: Vec<Vertex> = particles
