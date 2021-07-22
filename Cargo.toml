@@ -1,0 +1,27 @@
+[package]
+name = "graphics"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+glium = "*"
+glam = "*"
+lazy_static = "*"
+cgmath = "*"
+rand = "*"
+rayon = "*"
+
+[dev-dependencies]
+criterion = "0.3"
+
+[[bench]]
+name = "benchmark"
+harness = false
+
+[build]
+rustflags = ["-C", "target-cpu=native"]
+
+[profile.release]
+lto = "fat"
+panic = "abort"
+codegen-units = 1
