@@ -1,10 +1,10 @@
 #[macro_use]
 extern crate lazy_static;
+extern crate glam;
+use glam::Vec2;
 use rand::random;
 use rayon::prelude::*;
 use std::f32::consts::PI;
-
-use glam::Vec2;
 
 #[derive(Clone, Copy)]
 pub struct Particle {
@@ -48,22 +48,45 @@ lazy_static! {
     static ref VISC_LAP: f32 = 45.0 / (PI * f32::powf(H, 6.0));
 }
 
-pub fn init_sph(particles: &mut Vec<Particle>, dam_max_particles: usize) {
+pub fn init_dam_break(particles: &mut Vec<Particle>, dam_max_particles: usize) {
     let mut y = EPS;
-    while y < (VIEW_HEIGHT - EPS * 2.0) {
+    'outer: while y < (VIEW_HEIGHT - EPS * 2.0) {
         y += H;
-        let mut x = VIEW_WIDTH / 5.0;
-        while x <= VIEW_WIDTH / 1.5 {
+        let mut x = VIEW_WIDTH / 10.0;
+        while x <= VIEW_WIDTH / 3.0 {
             x += H;
             if particles.len() < dam_max_particles {
                 let jitter = random::<f32>();
                 particles.push(Particle::new(x + jitter, y));
             } else {
-                break;
+                break 'outer;
             }
         }
     }
     println!("Initialized dam break with {} particles", particles.len());
+}
+
+pub fn init_block(particles: &mut Vec<Particle>, max_block_particles: usize) {
+    let mut placed = 0;
+    let mut y = VIEW_HEIGHT / 1.5 - VIEW_HEIGHT / 5.0;
+    'outer: while y < VIEW_HEIGHT / 1.5 + VIEW_HEIGHT / 5.0 {
+        y += H * 0.95;
+        let mut x = VIEW_WIDTH / 2.0 - VIEW_HEIGHT / 5.0;
+        while x < VIEW_WIDTH / 2.0 + VIEW_HEIGHT / 5.0 {
+            x += H * 0.95;
+            if placed < max_block_particles {
+                particles.push(Particle::new(x, y));
+                placed += 1;
+            } else {
+                break 'outer;
+            }
+        }
+    }
+    println!(
+        "Initialized block of {} particles, new total {}",
+        placed,
+        particles.len()
+    );
 }
 
 pub fn integrate(particles: &mut Vec<Particle>) {

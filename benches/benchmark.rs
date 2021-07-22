@@ -3,7 +3,7 @@ use graphics;
 
 fn sim(n: usize, i: usize) {
     let mut particles: Vec<graphics::Particle> = Vec::new();
-    graphics::init_sph(&mut particles, n);
+    graphics::init_dam_break(&mut particles, n);
     for _ in 0..i {
         graphics::update(&mut particles);
     }

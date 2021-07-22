@@ -1,7 +1,6 @@
-extern crate glam;
 extern crate glium;
-
 use glium::{glutin, implement_vertex, uniform, Surface};
+use glutin::event::{ElementState, Event, KeyboardInput, StartCause, VirtualKeyCode, WindowEvent};
 use graphics;
 
 #[derive(Copy, Clone)]
@@ -10,18 +9,20 @@ struct Vertex {
 }
 implement_vertex!(Vertex, position);
 
-const DAM_PARTICLES: usize = 5000;
+const DAM_PARTICLES: usize = 3000;
+const BLOCK_PARTICLES: usize = 250;
 const POINT_SIZE: f32 = 15.0;
 
 fn main() {
     let mut particles: Vec<graphics::Particle> = Vec::new();
-    graphics::init_sph(&mut particles, DAM_PARTICLES);
+    graphics::init_dam_break(&mut particles, DAM_PARTICLES);
 
     let event_loop = glutin::event_loop::EventLoop::new();
     let size: glutin::dpi::LogicalSize<u32> =
         (graphics::WINDOW_WIDTH, graphics::WINDOW_HEIGHT).into();
     let wb = glutin::window::WindowBuilder::new()
         .with_inner_size(size)
+        .with_resizable(false)
         .with_title("Muller SPH");
     let cb = glutin::ContextBuilder::new();
     let display = glium::Display::new(wb, cb, &event_loop).unwrap();
@@ -59,16 +60,39 @@ fn main() {
 
     event_loop.run(move |event, _, control_flow| {
         match event {
-            glutin::event::Event::WindowEvent { event, .. } => match event {
-                glutin::event::WindowEvent::CloseRequested => {
+            Event::WindowEvent { event, .. } => match event {
+                WindowEvent::CloseRequested => {
                     *control_flow = glutin::event_loop::ControlFlow::Exit;
                     return;
                 }
+                WindowEvent::KeyboardInput {
+                    input:
+                        KeyboardInput {
+                            virtual_keycode: Some(virtual_code),
+                            state,
+                            ..
+                        },
+                    ..
+                } => match (virtual_code, state) {
+                    (VirtualKeyCode::R, ElementState::Pressed) => {
+                        particles.clear();
+                        println!("Cleared simulation");
+                        graphics::init_dam_break(&mut particles, DAM_PARTICLES);
+                    }
+                    (VirtualKeyCode::Space, ElementState::Pressed) => {
+                        graphics::init_block(&mut particles, BLOCK_PARTICLES);
+                    }
+                    (VirtualKeyCode::Escape, ElementState::Pressed) => {
+                        *control_flow = glutin::event_loop::ControlFlow::Exit;
+                        return;
+                    }
+                    _ => (),
+                },
                 _ => return,
             },
-            glutin::event::Event::NewEvents(cause) => match cause {
-                glutin::event::StartCause::Init => (),
-                glutin::event::StartCause::Poll => (),
+            Event::NewEvents(cause) => match cause {
+                StartCause::Init => (),
+                StartCause::Poll => (),
                 _ => return,
             },
             _ => return,
@@ -77,13 +101,13 @@ fn main() {
         graphics::update(&mut particles);
 
         // draw
-        let shape: Vec<Vertex> = particles
+        let data: Vec<Vertex> = particles
             .iter()
             .map(|p| Vertex {
                 position: p.x.to_array(),
             })
             .collect();
-        let vertex_buffer = glium::VertexBuffer::new(&display, &shape).unwrap();
+        let vertex_buffer = glium::VertexBuffer::new(&display, &data).unwrap();
 
         let mut target = display.draw();
         target.clear_color(0.9, 0.9, 0.9, 1.0);
