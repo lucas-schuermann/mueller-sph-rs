@@ -25,7 +25,7 @@ fn main() {
         .with_resizable(false)
         .with_title("Muller SPH");
     let cb = glutin::ContextBuilder::new();
-    let display = glium::Display::new(wb, cb, &event_loop).unwrap();
+    let display = glium::Display::new(wb, cb, &event_loop).expect("unable to create display");
 
     let vertex_shader_src = r#"
         #version 140
@@ -44,7 +44,7 @@ fn main() {
     "#;
     let program =
         glium::Program::from_source(&display, vertex_shader_src, fragment_shader_src, None)
-            .unwrap();
+            .expect("unable to compile shader");
     let ortho_matrix: cgmath::Matrix4<f32> = cgmath::ortho(
         0.0,
         mueller_sph_rs::VIEW_WIDTH,

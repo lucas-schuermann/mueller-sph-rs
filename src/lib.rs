@@ -6,7 +6,7 @@ use rand::random;
 use rayon::prelude::*;
 use std::f32::consts::PI;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default)]
 pub struct Particle {
     pub x: Vec2,
     pub v: Vec2,
@@ -19,10 +19,7 @@ impl Particle {
     pub fn new(x: f32, y: f32) -> Self {
         Self {
             x: Vec2::new(x, y),
-            v: Vec2::ZERO,
-            f: Vec2::ZERO,
-            rho: 0.0,
-            p: 0.0,
+            ..Default::default()
         }
     }
 }
@@ -40,9 +37,9 @@ pub const WINDOW_WIDTH: u32 = 800 * 2;
 pub const WINDOW_HEIGHT: u32 = 600 * 2;
 pub const VIEW_WIDTH: f32 = 1.5 * WINDOW_WIDTH as f32;
 pub const VIEW_HEIGHT: f32 = 1.5 * WINDOW_HEIGHT as f32;
+pub const G: Vec2 = glam::const_vec2!([0.0, -9.81]);
 
 lazy_static! {
-    static ref G: Vec2 = Vec2::new(0.0, -10.0);
     static ref POLY6: f32 = 4.0 / (PI * f32::powf(H, 8.0));
     static ref SPIKY_GRAD: f32 = -10.0 / (PI * f32::powf(H, 5.0));
     static ref VISC_LAP: f32 = 40.0 / (PI * f32::powf(H, 5.0));
@@ -148,7 +145,7 @@ pub fn compute_forces(particles: &mut Vec<Particle>) {
                 fvisc += VISC * MASS * (pj.v - pi.v) / pj.rho * *VISC_LAP * (H - r);
             }
         }
-        let fgrav = *G * MASS / pi.rho;
+        let fgrav = G * MASS / pi.rho;
         pi.f = fpress + fvisc + fgrav;
     });
 }
