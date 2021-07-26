@@ -5,5 +5,11 @@ Reimplementation of my [previous C++ SPH](https://github.com/cerrno/mueller-sph)
 
 Please see the original accompanying writeup [here](https://lucasschuermann.com/writing/implementing-sph-in-2d)
 
+## Usage
+Run with cargo:
+```
+RUST_LOG=info cargo r --release
+```
+
 ## License
 [MIT](https://lucasschuermann.com/license.txt)

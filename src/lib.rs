@@ -1,18 +1,26 @@
-#[macro_use]
-extern crate lazy_static;
-extern crate glam;
+#![warn(
+    unreachable_pub,
+    trivial_casts,
+    trivial_numeric_casts,
+    unused_extern_crates,
+    rust_2018_idioms,
+    missing_debug_implementations
+)]
+
 use glam::Vec2;
+use lazy_static::lazy_static;
+use log::info;
 use rand::random;
 use rayon::prelude::*;
 use std::f32::consts::PI;
 
-#[derive(Clone, Copy, Default)]
+#[derive(Debug, Clone, Copy, Default)]
 pub struct Particle {
-    pub x: Vec2,
-    pub v: Vec2,
-    pub f: Vec2,
-    pub rho: f32,
-    pub p: f32,
+    x: Vec2,
+    v: Vec2,
+    f: Vec2,
+    rho: f32,
+    p: f32,
 }
 
 impl Particle {
@@ -21,6 +29,10 @@ impl Particle {
             x: Vec2::new(x, y),
             ..Default::default()
         }
+    }
+
+    pub fn position(&self) -> Vec2 {
+        self.x
     }
 }
 
@@ -60,7 +72,7 @@ pub fn init_dam_break(particles: &mut Vec<Particle>, dam_max_particles: usize) {
             }
         }
     }
-    println!("Initialized dam break with {} particles", particles.len());
+    info!("Initialized dam break with {} particles", particles.len());
 }
 
 pub fn init_block(particles: &mut Vec<Particle>, max_block_particles: usize) {
@@ -79,7 +91,7 @@ pub fn init_block(particles: &mut Vec<Particle>, max_block_particles: usize) {
             }
         }
     }
-    println!(
+    info!(
         "Initialized block of {} particles, new total {}",
         placed,
         particles.len()
