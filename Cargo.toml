@@ -1,6 +1,6 @@
 [package]
 name = "mueller_sph_rs"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Lucas V. Schuermann <lucas@lvs.io>"]
 edition = "2018"
 

@@ -10,7 +10,7 @@ Run with cargo:
 ```
 RUST_LOG=info cargo r --release
 ```
-Press `r` to reset simulation and `space` to add a block of particles
+Press `r` to reset simulation or `space` to add a block of particles
 
 ## License
 [MIT](https://lucasschuermann.com/license.txt)
