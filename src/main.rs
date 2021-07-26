@@ -1,7 +1,6 @@
-extern crate glium;
-use glium::{glutin, implement_vertex, uniform, Surface};
+use glium::{glutin, implement_vertex, uniform, Surface, index};
 use glutin::event::{ElementState, Event, KeyboardInput, StartCause, VirtualKeyCode, WindowEvent};
-use mueller_sph_rs;
+use mueller_sph_rs::{init_dam_break, init_block, update};
 
 #[derive(Copy, Clone)]
 struct Vertex {
@@ -13,9 +12,11 @@ const DAM_PARTICLES: usize = 3000;
 const BLOCK_PARTICLES: usize = 250;
 const POINT_SIZE: f32 = 15.0;
 
-fn main() {
-    let mut particles: Vec<mueller_sph_rs::Particle> = Vec::new();
-    mueller_sph_rs::init_dam_break(&mut particles, DAM_PARTICLES);
+fn main() -> Result<(), String> {
+    env_logger::init();
+
+    let mut particles = vec![];
+    init_dam_break(&mut particles, DAM_PARTICLES);
 
     let event_loop = glutin::event_loop::EventLoop::new();
     let size: glutin::dpi::LogicalSize<u32> =
@@ -25,7 +26,8 @@ fn main() {
         .with_resizable(false)
         .with_title("Muller SPH");
     let cb = glutin::ContextBuilder::new();
-    let display = glium::Display::new(wb, cb, &event_loop).unwrap();
+    let display = glium::Display::new(wb, cb, &event_loop)
+        .map_err(|e| format!("Failed to create glium display: {}", e))?;
 
     let vertex_shader_src = r#"
         #version 140
@@ -44,19 +46,19 @@ fn main() {
     "#;
     let program =
         glium::Program::from_source(&display, vertex_shader_src, fragment_shader_src, None)
-            .unwrap();
-    let ortho_matrix: cgmath::Matrix4<f32> = cgmath::ortho(
+            .map_err(|e| format!("Failed to parse vertex shader source: {}", e))?;
+    let ortho_matrix: [[f32; 4]; 4] = cgmath::ortho(
         0.0,
         mueller_sph_rs::VIEW_WIDTH,
         0.0,
         mueller_sph_rs::VIEW_HEIGHT,
         0.0,
         1.0,
-    );
+    ).into();
     let uniforms = uniform! {
-        matrix: Into::<[[f32; 4]; 4]>::into(ortho_matrix)
+        matrix: ortho_matrix
     };
-    let indices = glium::index::NoIndices(glium::index::PrimitiveType::Points);
+    let indices = index::NoIndices(index::PrimitiveType::Points);
 
     event_loop.run(move |event, _, control_flow| {
         match event {
@@ -77,10 +79,10 @@ fn main() {
                     (VirtualKeyCode::R, ElementState::Pressed) => {
                         particles.clear();
                         println!("Cleared simulation");
-                        mueller_sph_rs::init_dam_break(&mut particles, DAM_PARTICLES);
+                        init_dam_break(&mut particles, DAM_PARTICLES);
                     }
                     (VirtualKeyCode::Space, ElementState::Pressed) => {
-                        mueller_sph_rs::init_block(&mut particles, BLOCK_PARTICLES);
+                        init_block(&mut particles, BLOCK_PARTICLES);
                     }
                     (VirtualKeyCode::Escape, ElementState::Pressed) => {
                         *control_flow = glutin::event_loop::ControlFlow::Exit;
@@ -98,15 +100,16 @@ fn main() {
             _ => return,
         }
 
-        mueller_sph_rs::update(&mut particles);
+        update(&mut particles);
 
         // draw
         let data: Vec<Vertex> = particles
             .iter()
             .map(|p| Vertex {
-                position: p.x.to_array(),
+                position: p.position().to_array(),
             })
             .collect();
+        // FIXME
         let vertex_buffer = glium::VertexBuffer::new(&display, &data).unwrap();
 
         let mut target = display.draw();
@@ -123,6 +126,7 @@ fn main() {
                     ..Default::default()
                 },
             )
+            // FIXME
             .unwrap();
         target.finish().unwrap();
     });
