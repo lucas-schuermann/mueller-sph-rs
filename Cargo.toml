@@ -1,7 +1,7 @@
 [package]
 name = "mueller_sph_rs"
 version = "0.1.0"
-authors = ["Lucas Schuermann <lucas@lvs.io>"]
+authors = ["Lucas V. Schuermann <lucas@lvs.io>"]
 edition = "2018"
 
 [dependencies]
