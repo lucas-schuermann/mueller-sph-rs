@@ -31,6 +31,7 @@ impl Particle {
         }
     }
 
+    #[inline(always)]
     pub fn position(&self) -> Vec2 {
         self.x
     }
