@@ -1,5 +1,6 @@
 use glium::{glutin, implement_vertex, index, uniform, Surface};
 use glutin::event::{ElementState, Event, KeyboardInput, StartCause, VirtualKeyCode, WindowEvent};
+use log::info;
 use mueller_sph_rs::{init_block, init_dam_break, update};
 
 #[derive(Copy, Clone)]
@@ -24,7 +25,7 @@ fn main() -> Result<(), String> {
     let wb = glutin::window::WindowBuilder::new()
         .with_inner_size(size)
         .with_resizable(false)
-        .with_title("Muller SPH");
+        .with_title("Müller SPH");
     let cb = glutin::ContextBuilder::new();
     let display = glium::Display::new(wb, cb, &event_loop)
         .map_err(|e| format!("Failed to create glium display: {}", e))?;
@@ -79,7 +80,7 @@ fn main() -> Result<(), String> {
                 } => match (virtual_code, state) {
                     (VirtualKeyCode::R, ElementState::Pressed) => {
                         particles.clear();
-                        println!("Cleared simulation");
+                        info!("Cleared simulation");
                         init_dam_break(&mut particles, DAM_PARTICLES);
                     }
                     (VirtualKeyCode::Space, ElementState::Pressed) => {
@@ -110,7 +111,6 @@ fn main() -> Result<(), String> {
                 position: p.position().to_array(),
             })
             .collect();
-        // FIXME
         let vertex_buffer = glium::VertexBuffer::new(&display, &data).unwrap();
 
         let mut target = display.draw();
@@ -127,7 +127,6 @@ fn main() -> Result<(), String> {
                     ..Default::default()
                 },
             )
-            // FIXME
             .unwrap();
         target.finish().unwrap();
     });
