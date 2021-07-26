@@ -14,7 +14,7 @@ use rayon::prelude::*;
 use std::f32::consts::PI;
 use log::info;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Default)]
 pub struct Particle {
     x: Vec2,
     v: Vec2,
@@ -27,10 +27,7 @@ impl Particle {
     pub fn new(x: f32, y: f32) -> Self {
         Self {
             x: Vec2::new(x, y),
-            v: Vec2::ZERO,
-            f: Vec2::ZERO,
-            rho: 0.0,
-            p: 0.0,
+            ..Default::default()
         }
     }
 
@@ -39,25 +36,25 @@ impl Particle {
     }
 }
 
-const REST_DENS: f32 = 1000.0;
-const GAS_CONST: f32 = 3000.0;
+const REST_DENS: f32 = 300.0;
+const GAS_CONST: f32 = 2000.0;
 const H: f32 = 16.0;
 const HSQ: f32 = H * H;
-const MASS: f32 = 65.0;
-const VISC: f32 = 250.0;
-const DT: f32 = 0.0008;
+const MASS: f32 = 2.5;
+const VISC: f32 = 200.0;
+const DT: f32 = 0.0007;
 const EPS: f32 = H;
 const BOUND_DAMPING: f32 = -0.5;
 pub const WINDOW_WIDTH: u32 = 800 * 2;
 pub const WINDOW_HEIGHT: u32 = 600 * 2;
 pub const VIEW_WIDTH: f32 = 1.5 * WINDOW_WIDTH as f32;
 pub const VIEW_HEIGHT: f32 = 1.5 * WINDOW_HEIGHT as f32;
+pub const G: Vec2 = glam::const_vec2!([0.0, -9.81]);
 
 lazy_static! {
-    static ref G: Vec2 = Vec2::new(0.0, 12000.0 * -9.8);
-    static ref POLY6: f32 = 315.0 / (65.0 * PI * f32::powf(H, 9.0));
-    static ref SPIKY_GRAD: f32 = -45.0 / (PI * f32::powf(H, 6.0));
-    static ref VISC_LAP: f32 = 45.0 / (PI * f32::powf(H, 6.0));
+    static ref POLY6: f32 = 4.0 / (PI * f32::powf(H, 8.0));
+    static ref SPIKY_GRAD: f32 = -10.0 / (PI * f32::powf(H, 5.0));
+    static ref VISC_LAP: f32 = 40.0 / (PI * f32::powf(H, 5.0));
 }
 
 pub fn init_dam_break(particles: &mut Vec<Particle>, dam_max_particles: usize) {
@@ -156,11 +153,11 @@ pub fn compute_forces(particles: &mut Vec<Particle>) {
             if r < H {
                 fpress += -rij.normalize() * MASS * (pi.p + pj.p) / (2.0 * pj.rho)
                     * *SPIKY_GRAD
-                    * f32::powf(H - r, 2.0);
+                    * f32::powf(H - r, 3.0);
                 fvisc += VISC * MASS * (pj.v - pi.v) / pj.rho * *VISC_LAP * (H - r);
             }
         }
-        let fgrav = *G * pi.rho;
+        let fgrav = G * MASS / pi.rho;
         pi.f = fpress + fvisc + fgrav;
     });
 }
