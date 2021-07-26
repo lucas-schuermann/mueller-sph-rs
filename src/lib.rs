@@ -9,10 +9,10 @@
 
 use glam::Vec2;
 use lazy_static::lazy_static;
+use log::info;
 use rand::random;
 use rayon::prelude::*;
 use std::f32::consts::PI;
-use log::info;
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct Particle {

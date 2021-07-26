@@ -1,6 +1,6 @@
-use glium::{glutin, implement_vertex, uniform, Surface, index};
+use glium::{glutin, implement_vertex, index, uniform, Surface};
 use glutin::event::{ElementState, Event, KeyboardInput, StartCause, VirtualKeyCode, WindowEvent};
-use mueller_sph_rs::{init_dam_break, init_block, update};
+use mueller_sph_rs::{init_block, init_dam_break, update};
 
 #[derive(Copy, Clone)]
 struct Vertex {
@@ -54,7 +54,8 @@ fn main() -> Result<(), String> {
         mueller_sph_rs::VIEW_HEIGHT,
         0.0,
         1.0,
-    ).into();
+    )
+    .into();
     let uniforms = uniform! {
         matrix: ortho_matrix
     };
