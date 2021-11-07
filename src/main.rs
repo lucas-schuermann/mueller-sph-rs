@@ -12,7 +12,7 @@ implement_vertex!(Vertex, position);
 const DAM_PARTICLES: usize = 3000;
 const BLOCK_PARTICLES: usize = 250;
 const MAX_PARTICLES: usize = DAM_PARTICLES + 25 * BLOCK_PARTICLES;
-const POINT_SIZE: f32 = 15.0;
+const POINT_SIZE: f32 = 10.0;
 
 fn main() -> Result<(), String> {
     env_logger::init();
@@ -126,12 +126,18 @@ fn main() -> Result<(), String> {
                 position: p.position().to_array(),
             })
             .collect();
-        vertex_buffer.slice(0..data.len()).unwrap().write(&data);
+        vertex_buffer.slice(0..data.len()).unwrap().write(&data); // safe due to preallocated known length
 
         let mut target = display.draw();
         target.clear_color(0.9, 0.9, 0.9, 1.0);
         target
-            .draw(&vertex_buffer, &indices, &program, &uniforms, &draw_params)
+            .draw(
+                vertex_buffer.slice(0..particles.len()).unwrap(),
+                &indices,
+                &program,
+                &uniforms,
+                &draw_params,
+            )
             .unwrap();
         target.finish().unwrap();
     });
