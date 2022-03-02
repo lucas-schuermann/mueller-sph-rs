@@ -1,19 +1,23 @@
 [package]
 name = "mueller_sph_rs"
-version = "0.2.0"
+version = "0.3.0"
+repository = "https://github.com/cerrno/mueller-sph-rs"
 authors = ["Lucas V. Schuermann <lucas@lvs.io>"]
 edition = "2021"
+license = "MIT"
+readme = "README.md"
+publish = false
 
 [dependencies]
-glium = "0.30.1"
-glam = "0.20.0"
-lazy_static = "1.4.0"
-cgmath = "0.18.0"
-rand = "0.8.4"
-rayon = "1.5.1"
+glium = "0.31"
+glam = "0.20"
+lazy_static = "1.4"
+cgmath = "0.18"
+rand = "0.8"
+rayon = "1.5"
 log = "0.4"
 # usually this would be present in a binary-specific section
-env_logger = "0.9.0"
+env_logger = "0.9"
 
 [dev-dependencies]
 criterion = "0.3"
@@ -29,3 +33,5 @@ rustflags = ["-C", "target-cpu=native"]
 lto = "fat"
 panic = "abort"
 codegen-units = 1
+debug = 0
+strip = true

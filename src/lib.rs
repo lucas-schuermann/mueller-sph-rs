@@ -1,18 +1,10 @@
-#![warn(
-    unreachable_pub,
-    trivial_casts,
-    trivial_numeric_casts,
-    unused_extern_crates,
-    rust_2018_idioms,
-    missing_debug_implementations
-)]
+use std::f32::consts::PI;
 
 use glam::Vec2;
 use lazy_static::lazy_static;
 use log::info;
 use rand::random;
 use rayon::prelude::*;
-use std::f32::consts::PI;
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct Particle {
@@ -24,14 +16,15 @@ pub struct Particle {
 }
 
 impl Particle {
+    #[must_use]
     pub fn new(x: f32, y: f32) -> Self {
         Self {
             x: Vec2::new(x, y),
-            ..Default::default()
+            ..Particle::default()
         }
     }
 
-    #[inline(always)]
+    #[must_use]
     pub fn position(&self) -> Vec2 {
         self.x
     }
@@ -121,14 +114,14 @@ pub fn integrate(particles: &mut Vec<Particle>) {
             p.v.y *= BOUND_DAMPING;
             p.x.y = VIEW_HEIGHT - EPS;
         }
-    })
+    });
 }
 
 pub fn compute_density_pressure(particles: &mut Vec<Particle>) {
     let particles_initial = particles.clone();
     particles.par_iter_mut().for_each(|pi| {
         let mut rho = 0.0f32;
-        for pj in particles_initial.iter() {
+        for pj in &particles_initial {
             let rij = pj.x - pi.x;
             let r2 = rij.length_squared();
             if r2 < HSQ {
