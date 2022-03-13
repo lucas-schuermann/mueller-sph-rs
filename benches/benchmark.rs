@@ -1,11 +1,13 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use mueller_sph_rs;
 
+const DAM_PARTICLES: usize = 5000;
+
 fn dam_break(n: usize, i: usize) {
-    let mut particles: Vec<mueller_sph_rs::Particle> = Vec::new();
-    mueller_sph_rs::init_dam_break(&mut particles, n);
+    let mut state = mueller_sph_rs::State::<DAM_PARTICLES>::new();
+    state.init_dam_break(n);
     for _ in 0..i {
-        mueller_sph_rs::update(&mut particles);
+        state.update();
     }
 }
 

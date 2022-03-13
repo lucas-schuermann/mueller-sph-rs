@@ -1,7 +1,7 @@
 use glium::{glutin, implement_vertex, index, uniform, Surface};
 use glutin::event::{ElementState, Event, KeyboardInput, StartCause, VirtualKeyCode, WindowEvent};
 use log::info;
-use mueller_sph_rs::{init_block, init_dam_break, update};
+use mueller_sph_rs::State;
 
 #[derive(Copy, Clone)]
 struct Vertex {
@@ -17,8 +17,8 @@ const POINT_SIZE: f32 = 10.0;
 fn main() -> Result<(), String> {
     env_logger::init();
 
-    let mut particles = vec![];
-    init_dam_break(&mut particles, DAM_PARTICLES);
+    let mut simulation = State::<MAX_PARTICLES>::new();
+    simulation.init_dam_break(DAM_PARTICLES);
 
     let event_loop = glutin::event_loop::EventLoop::new();
     let size: glutin::dpi::LogicalSize<u32> =
@@ -90,13 +90,13 @@ fn main() -> Result<(), String> {
                 } => match (virtual_code, state) {
                     (VirtualKeyCode::R, ElementState::Pressed) => {
                         vertex_buffer.invalidate();
-                        particles.clear();
+                        simulation.i.clear();
                         info!("Cleared simulation");
-                        init_dam_break(&mut particles, DAM_PARTICLES);
+                        simulation.init_dam_break(DAM_PARTICLES);
                     }
                     (VirtualKeyCode::Space, ElementState::Pressed) => {
-                        if particles.len() + BLOCK_PARTICLES < MAX_PARTICLES {
-                            init_block(&mut particles, BLOCK_PARTICLES);
+                        if simulation.i.len() + BLOCK_PARTICLES < MAX_PARTICLES {
+                            simulation.init_block(BLOCK_PARTICLES);
                         } else {
                             info!("Max particles reached");
                         }
@@ -117,10 +117,11 @@ fn main() -> Result<(), String> {
             _ => return,
         }
 
-        update(&mut particles);
+        simulation.update();
 
         // draw
-        let data: Vec<Vertex> = particles
+        let data: Vec<Vertex> = simulation
+            .f
             .iter()
             .map(|p| Vertex {
                 position: p.position().to_array(),
@@ -132,7 +133,7 @@ fn main() -> Result<(), String> {
         target.clear_color(0.9, 0.9, 0.9, 1.0);
         target
             .draw(
-                vertex_buffer.slice(0..particles.len()).unwrap(),
+                vertex_buffer.slice(0..simulation.f.len()).unwrap(),
                 &indices,
                 &program,
                 &uniforms,
