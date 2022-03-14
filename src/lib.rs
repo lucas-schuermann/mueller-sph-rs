@@ -55,6 +55,10 @@ impl Particle {
 
 #[derive(Debug, Default)]
 pub struct State<const M: usize> {
+    // Track both an initial and final state buffer so we don't need to copy in order
+    // to access the current state during a mutable parallel iteration. Simulation
+    // methods read from initial and modify final. At the end of the simulation step,
+    // copy the final state into the initial (to be used in the next step).
     pub i: Box<ArrayVec<Particle, M>>,
     pub f: Box<ArrayVec<Particle, M>>,
 }
