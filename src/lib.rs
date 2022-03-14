@@ -55,16 +55,15 @@ impl Particle {
 
 #[derive(Debug, Default)]
 pub struct State<const M: usize> {
-    pub i: ArrayVec<Particle, M>,
-    pub f: ArrayVec<Particle, M>,
+    pub i: Box<ArrayVec<Particle, M>>,
+    pub f: Box<ArrayVec<Particle, M>>,
 }
 
 impl<const M: usize> State<M> {
     #[must_use]
     pub fn new() -> Self {
         State {
-            i: ArrayVec::new(),
-            f: ArrayVec::new(),
+            ..Default::default()
         }
     }
 
@@ -143,7 +142,7 @@ impl<const M: usize> State<M> {
         let sf = &mut self.f;
         si.par_iter().zip(sf.par_iter_mut()).for_each(|(pi, pf)| {
             let mut rho = 0.0f32;
-            for pj in si {
+            for pj in si.iter() {
                 let rij = pj.x - pi.x;
                 let r2 = rij.length_squared();
                 if r2 < HSQ {
