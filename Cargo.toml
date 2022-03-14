@@ -16,6 +16,7 @@ cgmath = "0.18"
 rand = "0.8"
 rayon = "1.5"
 log = "0.4"
+arrayvec = "0.7"
 # usually this would be present in a binary-specific section
 env_logger = "0.9"
 
