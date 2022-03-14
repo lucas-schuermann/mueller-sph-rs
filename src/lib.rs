@@ -42,7 +42,7 @@ impl Particle {
     pub fn new(x: f32, y: f32) -> Self {
         Self {
             x: Vec2::new(x, y),
-            rho: 3000.0 / REST_DENS,
+            rho: 1.0,
             ..Particle::default()
         }
     }
