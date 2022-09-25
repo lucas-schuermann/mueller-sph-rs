@@ -1,6 +1,6 @@
 [package]
 name = "mueller_sph_rs"
-version = "0.3.0"
+version = "0.3.1"
 repository = "https://github.com/cerrno/mueller-sph-rs"
 authors = ["Lucas V. Schuermann <lucas@lvs.io>"]
 edition = "2021"
@@ -9,26 +9,20 @@ readme = "README.md"
 publish = false
 
 [dependencies]
-glium = "0.31"
-glam = "0.20"
-lazy_static = "1.4"
-cgmath = "0.18"
-rand = "0.8"
-rayon = "1.5"
-log = "0.4"
-arrayvec = "0.7"
-# usually this would be present in a binary-specific section
-env_logger = "0.9"
+cgmath = "0.18.0"
+glium = "0.32.1"
+glam = { version = "0.21.3", features = ["fast-math", "scalar-math"] }
+rand = "0.8.5"
+rayon = "1.5.3"
+log = "0.4.17"
+env_logger = "0.9.1"
 
 [dev-dependencies]
-criterion = "0.3"
+criterion = "0.4.0"
 
 [[bench]]
 name = "benchmark"
 harness = false
-
-[build]
-rustflags = ["-C", "target-cpu=native"]
 
 [profile.release]
 lto = "fat"

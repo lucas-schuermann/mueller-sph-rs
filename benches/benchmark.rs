@@ -1,10 +1,8 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use mueller_sph_rs;
 
-const DAM_PARTICLES: usize = 5000;
-
 fn dam_break(n: usize, i: usize) {
-    let mut state = mueller_sph_rs::State::<DAM_PARTICLES>::new();
+    let mut state = mueller_sph_rs::Simulation::<5000>::new(1200.0, 800.0);
     state.init_dam_break(n);
     for _ in 0..i {
         state.update();

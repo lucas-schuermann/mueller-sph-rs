@@ -1,28 +1,29 @@
-use glium::{glutin, implement_vertex, index, uniform, Surface};
+use std::borrow::Cow;
+
+use glam::Vec2;
+use glium::{glutin, index, uniform, Surface, VertexFormat};
 use glutin::event::{ElementState, Event, KeyboardInput, StartCause, VirtualKeyCode, WindowEvent};
 use log::info;
-use mueller_sph_rs::State;
 
-#[derive(Copy, Clone)]
-struct Vertex {
-    position: [f32; 2],
-}
-implement_vertex!(Vertex, position);
+use mueller_sph_rs::Simulation;
 
 const DAM_PARTICLES: usize = 2500;
 const BLOCK_PARTICLES: usize = 250;
 const MAX_PARTICLES: usize = DAM_PARTICLES + 25 * BLOCK_PARTICLES;
 const POINT_SIZE: f32 = 10.0;
+const WINDOW_WIDTH: u32 = 1200;
+const WINDOW_HEIGHT: u32 = 800;
+const VIEW_WIDTH: f32 = 1.5 * WINDOW_WIDTH as f32;
+const VIEW_HEIGHT: f32 = 1.5 * WINDOW_HEIGHT as f32;
 
 fn main() -> Result<(), String> {
     env_logger::init();
 
-    let mut simulation = State::<MAX_PARTICLES>::new();
+    let mut simulation = Simulation::<MAX_PARTICLES>::new(VIEW_WIDTH, VIEW_HEIGHT);
     simulation.init_dam_break(DAM_PARTICLES);
 
     let event_loop = glutin::event_loop::EventLoop::new();
-    let size: glutin::dpi::LogicalSize<u32> =
-        (mueller_sph_rs::WINDOW_WIDTH, mueller_sph_rs::WINDOW_HEIGHT).into();
+    let size: glutin::dpi::LogicalSize<u32> = (WINDOW_WIDTH, WINDOW_HEIGHT).into();
     let wb = glutin::window::WindowBuilder::new()
         .with_inner_size(size)
         .with_resizable(false)
@@ -49,23 +50,32 @@ fn main() -> Result<(), String> {
     let program =
         glium::Program::from_source(&display, vertex_shader_src, fragment_shader_src, None)
             .map_err(|e| format!("Failed to parse vertex shader source: {}", e))?;
-    let ortho_matrix: [[f32; 4]; 4] = cgmath::ortho(
-        0.0,
-        mueller_sph_rs::VIEW_WIDTH,
-        0.0,
-        mueller_sph_rs::VIEW_HEIGHT,
-        0.0,
-        1.0,
-    )
-    .into();
+    let ortho_matrix: [[f32; 4]; 4] =
+        cgmath::ortho(0.0, VIEW_WIDTH, 0.0, VIEW_HEIGHT, 0.0, 1.0).into();
     let uniforms = uniform! {
         matrix: ortho_matrix
     };
     let indices = index::NoIndices(index::PrimitiveType::Points);
 
     // preallocate vertex buffer
-    let vertex_buffer = glium::VertexBuffer::empty_dynamic(&display, MAX_PARTICLES * 2)
-        .map_err(|e| format!("Failed to create vertex buffer: {}", e))?;
+    let empty_buffer = vec![Vec2::ZERO; MAX_PARTICLES];
+    let bindings: VertexFormat = Cow::Owned(vec![(
+        Cow::Borrowed("position"),
+        2 * std::mem::size_of::<f32>(),
+        0,
+        glium::vertex::AttributeType::F32F32,
+        false,
+    )]);
+    let vertex_buffer = unsafe {
+        glium::VertexBuffer::new_raw_dynamic(
+            &display,
+            &empty_buffer,
+            bindings,
+            2 * std::mem::size_of::<f32>(),
+        )
+        .map_err(|e| format!("Failed to create vertex buffer: {}", e))?
+    };
+
     let draw_params = glium::DrawParameters {
         polygon_mode: glium::PolygonMode::Point,
         point_size: Some(POINT_SIZE),
@@ -90,16 +100,13 @@ fn main() -> Result<(), String> {
                 } => match (virtual_code, state) {
                     (VirtualKeyCode::R, ElementState::Pressed) => {
                         vertex_buffer.invalidate();
-                        simulation.i.clear();
+                        vertex_buffer.write(&vec![Vec2::ZERO; MAX_PARTICLES]);
+                        simulation.clear();
                         info!("Cleared simulation");
                         simulation.init_dam_break(DAM_PARTICLES);
                     }
                     (VirtualKeyCode::Space, ElementState::Pressed) => {
-                        if simulation.i.len() + BLOCK_PARTICLES < MAX_PARTICLES {
-                            simulation.init_block(BLOCK_PARTICLES);
-                        } else {
-                            info!("Max particles reached");
-                        }
+                        simulation.init_block(BLOCK_PARTICLES);
                     }
                     (VirtualKeyCode::Escape, ElementState::Pressed) => {
                         *control_flow = glutin::event_loop::ControlFlow::Exit;
@@ -119,26 +126,15 @@ fn main() -> Result<(), String> {
 
         simulation.update();
 
-        // draw
-        let data: Vec<Vertex> = simulation
-            .f
-            .iter()
-            .map(|p| Vertex {
-                position: p.position().to_array(),
-            })
-            .collect();
-        vertex_buffer.slice(0..data.len()).unwrap().write(&data); // safe due to preallocated known length
+        vertex_buffer
+            .slice(0..simulation.num_particles)
+            .unwrap()
+            .write(&simulation.x); // unwrap is safe due to preallocated known length
 
         let mut target = display.draw();
         target.clear_color(0.9, 0.9, 0.9, 1.0);
         target
-            .draw(
-                vertex_buffer.slice(0..simulation.f.len()).unwrap(),
-                &indices,
-                &program,
-                &uniforms,
-                &draw_params,
-            )
+            .draw(&vertex_buffer, &indices, &program, &uniforms, &draw_params)
             .unwrap();
         target.finish().unwrap();
     });
