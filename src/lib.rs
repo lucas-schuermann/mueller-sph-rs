@@ -110,7 +110,7 @@ impl<const MAX_PARTICLES: usize> Simulation<MAX_PARTICLES> {
     pub fn integrate(&mut self) {
         self.x
             .par_iter_mut()
-            .zip(self.v.par_iter_mut())
+            .zip_eq(self.v.par_iter_mut())
             .enumerate()
             .for_each(|(i, (x, v))| {
                 *v += DT * self.f[i] / self.rho[i];

@@ -1,6 +1,6 @@
 [package]
 name = "mueller_sph_rs"
-version = "0.3.1"
+version = "0.3.2"
 repository = "https://github.com/cerrno/mueller-sph-rs"
 authors = ["Lucas V. Schuermann <lucas@lvs.io>"]
 edition = "2021"
@@ -11,11 +11,11 @@ publish = false
 [dependencies]
 cgmath = "0.18.0"
 glium = "0.32.1"
-glam = { version = "0.21.3", features = ["fast-math", "scalar-math"] }
+glam = { version = "0.22.0", features = ["fast-math", "scalar-math"] }
 rand = "0.8.5"
-rayon = "1.5.3"
+rayon = "1.6.0"
 log = "0.4.17"
-env_logger = "0.9.1"
+env_logger = "0.9.3"
 
 [dev-dependencies]
 criterion = "0.4.0"
