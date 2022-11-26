@@ -137,11 +137,10 @@ impl<const MAX_PARTICLES: usize> Simulation<MAX_PARTICLES> {
     }
 
     pub fn compute_density_pressure(&mut self) {
-        (0..self.num_particles)
-            .into_par_iter()
-            .zip_eq(self.rho.par_iter_mut())
+        self.rho.par_iter_mut()
             .zip_eq(self.p.par_iter_mut())
-            .for_each(|((i, rho), p)| {
+            .enumerate()
+            .for_each(|(i,(rho, p))| {
                 *rho = 0.0;
                 for j in 0..self.num_particles {
                     let rij = self.x[j] - self.x[i];
@@ -155,9 +154,7 @@ impl<const MAX_PARTICLES: usize> Simulation<MAX_PARTICLES> {
     }
 
     pub fn compute_forces(&mut self) {
-        (0..self.num_particles)
-            .into_par_iter()
-            .zip_eq(self.f.par_iter_mut())
+        self.f.par_iter_mut().enumerate()
             .for_each(|(i, f)| {
                 let mut fpress = Vec2::ZERO;
                 let mut fvisc = Vec2::ZERO;
