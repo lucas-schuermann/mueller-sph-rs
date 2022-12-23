@@ -4,6 +4,10 @@ This is a reimplementation of my [previous C++ SPH](https://github.com/cerrno/mu
 
 ## Running
 ```bash
+# install dependencies (debian/ubuntu)
+apt install build-essential pkg-config cmake libfreetype6-dev libfontconfig1-dev
+
+# build and launch demo
 RUST_LOG=info cargo run --release
 ```
 Press `r` to reset simulation or `space` to add a block of particles
