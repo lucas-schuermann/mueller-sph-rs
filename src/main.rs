@@ -1,3 +1,5 @@
+#![allow(clippy::cast_precision_loss)]
+
 use std::borrow::Cow;
 
 use glam::Vec2;
@@ -16,6 +18,7 @@ const WINDOW_HEIGHT: u32 = 800;
 const VIEW_WIDTH: f32 = 1.5 * WINDOW_WIDTH as f32;
 const VIEW_HEIGHT: f32 = 1.5 * WINDOW_HEIGHT as f32;
 
+#[allow(clippy::too_many_lines)]
 fn main() -> Result<(), String> {
     env_logger::init();
 
@@ -30,7 +33,7 @@ fn main() -> Result<(), String> {
         .with_title("Müller SPH");
     let cb = glutin::ContextBuilder::new();
     let display = glium::Display::new(wb, cb, &event_loop)
-        .map_err(|e| format!("Failed to create glium display: {}", e))?;
+        .map_err(|e| format!("Failed to create glium display: {e}"))?;
 
     let vertex_shader_src = r#"
         #version 140
@@ -49,7 +52,7 @@ fn main() -> Result<(), String> {
     "#;
     let program =
         glium::Program::from_source(&display, vertex_shader_src, fragment_shader_src, None)
-            .map_err(|e| format!("Failed to parse vertex shader source: {}", e))?;
+            .map_err(|e| format!("Failed to parse vertex shader source: {e}"))?;
     let ortho_matrix: [[f32; 4]; 4] =
         cgmath::ortho(0.0, VIEW_WIDTH, 0.0, VIEW_HEIGHT, 0.0, 1.0).into();
     let uniforms = uniform! {
@@ -73,7 +76,7 @@ fn main() -> Result<(), String> {
             bindings,
             2 * std::mem::size_of::<f32>(),
         )
-        .map_err(|e| format!("Failed to create vertex buffer: {}", e))?
+        .map_err(|e| format!("Failed to create vertex buffer: {e}"))?
     };
 
     let draw_params = glium::DrawParameters {
@@ -117,8 +120,7 @@ fn main() -> Result<(), String> {
                 _ => return,
             },
             Event::NewEvents(cause) => match cause {
-                StartCause::Init => (),
-                StartCause::Poll => (),
+                StartCause::Init | StartCause::Poll => (),
                 _ => return,
             },
             _ => return,
@@ -134,7 +136,7 @@ fn main() -> Result<(), String> {
         let mut target = display.draw();
         target.clear_color(0.9, 0.9, 0.9, 1.0);
         target
-            .draw(&vertex_buffer, &indices, &program, &uniforms, &draw_params)
+            .draw(&vertex_buffer, indices, &program, &uniforms, &draw_params)
             .unwrap();
         target.finish().unwrap();
     });
